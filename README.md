@@ -57,3 +57,13 @@ response code 400
   ]
 }
 ```
+
+## deployment 
+```
+mvn clean package azure-webapp:deploy
+```
+
+## Azure URL
+```aidl
+http://bookmsdavid.azurewebsites.net/bookms/swagger-ui/index.html?configUrl=/bookms/v3/api-docs/swagger-config#/
+```

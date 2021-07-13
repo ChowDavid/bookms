@@ -44,7 +44,7 @@ public class BookController {
      * All books
      * @return
      */
-    @GetMapping("/")
+    @GetMapping()
     public List<Book> findAll(){
         List<Book> books = bookRepository.findAll();
         books.stream().forEach(b->eventService.bookSearch(b));
@@ -150,10 +150,7 @@ public class BookController {
     }
 
 
-    @GetMapping()
-    public Book get(){
-        return new Book();
-    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public final ResponseEntity<ErrorResponse> validationErrorException(MethodArgumentNotValidException ex, WebRequest request){
