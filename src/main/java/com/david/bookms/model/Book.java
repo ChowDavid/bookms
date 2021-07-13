@@ -8,15 +8,13 @@ import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@ToString
+
 public class Book {
 
     @Id
@@ -24,7 +22,7 @@ public class Book {
     private long id;
 
     private String title;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "author")
     private List<String> authors;
     @JsonProperty(value = "ISBN")
@@ -34,5 +32,14 @@ public class Book {
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate publicationDate;
 
-
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", authors=" + authors +
+                ", isbn='" + isbn + '\'' +
+                ", publicationDate=" + publicationDate +
+                '}';
+    }
 }

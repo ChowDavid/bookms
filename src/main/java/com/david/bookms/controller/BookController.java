@@ -41,6 +41,17 @@ public class BookController {
     private BookRepository bookRepository;
 
     /**
+     * All books
+     * @return
+     */
+    @GetMapping("/")
+    public List<Book> findAll(){
+        List<Book> books = bookRepository.findAll();
+        books.stream().forEach(b->eventService.bookSearch(b));
+        return books;
+    }
+
+    /**
      * Create Book
      * @param book
      * @return
@@ -94,10 +105,12 @@ public class BookController {
     @PutMapping("/{id}")
     public Book updateBook(@PathVariable("id") Long id,@RequestBody @Valid BookDto book){
         Book dbBook = bookRepository.findById(id).orElse(null);
+        Book before = new Book();
+        BeanUtils.copyProperties(dbBook,before);
         if (book!=null) {
             BeanUtils.copyProperties(book,dbBook,"id");
             bookRepository.save(dbBook);
-            eventService.bookModify(dbBook);
+            eventService.bookModify(before,dbBook);
             return dbBook;
         } else {
             throw new NoBookFoundExcpetion("Book not found by id="+id);
