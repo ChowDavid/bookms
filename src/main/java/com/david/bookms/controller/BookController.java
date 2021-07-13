@@ -13,15 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.Valid;
@@ -150,8 +142,6 @@ public class BookController {
     }
 
 
-
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public final ResponseEntity<ErrorResponse> validationErrorException(MethodArgumentNotValidException ex, WebRequest request){
         log.error("validationErrorException found {}",ex.getMessage());
@@ -159,6 +149,15 @@ public class BookController {
         details.addAll(ex.getBindingResult().getAllErrors().stream().map(e->(FieldError)e).map(e->"Field "+e.getField()+"-"+e.getDefaultMessage()).collect(Collectors.toList()));
         ErrorResponse error = new ErrorResponse("Validation Error", details);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoBookFoundExcpetion.class)
+    public final ResponseEntity<ErrorResponse> noBookFound(NoBookFoundExcpetion ex, WebRequest request) {
+        log.error("noBookFound found {}",ex.getMessage());
+        List<String> details = new ArrayList<>();
+        details.add(ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Detail", details);
+        return new ResponseEntity<>(error, HttpStatus.OK);
     }
 
     @ExceptionHandler(Exception.class)
@@ -169,5 +168,7 @@ public class BookController {
         ErrorResponse error = new ErrorResponse("Exception", details);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+
+
 
 }
