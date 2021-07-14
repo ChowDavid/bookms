@@ -5,6 +5,7 @@
 - Spring data
 - Kafka
 - swagger api 3.0
+- Code deploy to Azure
 
 ## requirement
 - Java 1.8
