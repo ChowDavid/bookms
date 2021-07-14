@@ -3,6 +3,7 @@
 - Springboot
 - Restful
 - Spring data
+- JPA Search Criteria  
 - Kafka
 - swagger api 3.0
 - Code deploy to Azure
