@@ -37,27 +37,6 @@ http://localhost/bookms/swagger-ui/index.html?configUrl=/bookms/v3/api-docs/swag
 2021-07-13T15:38:33.429 Book Delete for Book{id=1, title='C#', authors=[David, John], isbn='1234567890123', publicationDate=2021-03-03}
 ```
 
-## error message if ISBN is not 13 dig
-```aidl
-response 400
-{
-  "message": "Validation Error",
-  "details": [
-    "Field isbn-ISBN must be 13 digital"
-  ]
-}
-```
-## book not found error
-response code 400
-```aidl
-{
-  "message": "Exception",
-  "details": [
-    "Book not found by id=100"
-  ]
-}
-```
-
 ## deployment __
 ```
 mvn clean package azure-webapp:deploy
@@ -67,3 +46,105 @@ mvn clean package azure-webapp:deploy
 ```aidl
 http://bookmsdavid.azurewebsites.net/bookms/swagger-ui/index.html?configUrl=/bookms/v3/api-docs/swagger-config#/
 ```
+
+## Possible Operation and response
+### Create Book
+- if create successfully
+```
+response code: 200
+{
+  "id": 1,
+  "title": "string",
+  "authors": [
+    "string"
+  ],
+  "publicationDate": "14/07/2021",
+  "ISBN": "1234567890123"
+}
+```
+- an event service will sent to message broker
+- if does not provide ISBN
+```
+response code: 400
+{
+  "message": "Validation Error",
+  "details": [
+    "Field isbn-must not be blank"
+  ]
+}
+```
+- if ISBN validation invalid
+```
+response code: 400
+{
+  "message": "Validation Error",
+  "details": [
+    "Field isbn-ISBN must be 13 digital"
+  ]
+}
+```
+### find Book by ID
+- if no book found
+```
+response code: 200
+{
+  "message": "Detail",
+  "details": [
+    "Book not found by id=2"
+  ]
+}
+```
+- if book found
+```
+response code: 200
+{
+  "id": 1,
+  "title": "string",
+  "authors": [
+    "string"
+  ],
+  "publicationDate": "14/07/2021",
+  "ISBN": "1234567890123"
+}
+```
+- an event service will sent to message broker
+### modify book
+- if book not found same as GET by ID
+- if book found and isbn has issue same as book creation
+- if book found and input without any problem
+```
+response code: 200
+{
+  "id": 1,
+  "title": "Java",
+  "authors": [
+    "David"
+  ],
+  "publicationDate": "14/07/2021",
+  "ISBN": "1234567890124"
+}
+```
+- an event service will sent to message broker
+### delete book
+- if book not found, same result as book not found above
+- otherwise success
+```
+response code: 200
+{
+  "id": 1,
+  "title": "Java",
+  "authors": [
+    "David"
+  ],
+  "publicationDate": "14/07/2021",
+  "ISBN": "1234567890124"
+}
+```
+- an event service will sent to message broker
+### Find all Book
+- show empty [] is not book found
+### Find by title, Author, ISBN
+- support case insensitive
+- if book found. book will be display
+- if book found. event message will send to broker
+- if book not found. an error resposne will show.
