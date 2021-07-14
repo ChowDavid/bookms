@@ -187,7 +187,69 @@ public class BookControllerTest {
         verify(eventService,times(1)).bookModify(any(Book.class),any(Book.class));
     }
 
+    @Test
+    public void searchByAuther_NotFound() throws Exception{
+        when(bookRepository.findByAuthorsIgnoreCaseIn(Arrays.asList("hello"))).thenReturn(null);
+        mockMvc.perform(get("/books/searchByAuthor/hello"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Detail\",\"details\":[\"Book not found by author=hello\"]}"
+                )));
+        verify(eventService,never()).bookSearch(any(Book.class));
+    }
 
+    @Test
+    public void searchByTitle_NotFound() throws Exception{
+        when(bookRepository.findByTitleIgnoreCase("java")).thenReturn(null);
+        mockMvc.perform(get("/books/searchByTitle/java"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Detail\",\"details\":[\"Book not found by title=java\"]}"
+                )));
+        verify(eventService,never()).bookSearch(any(Book.class));
+    }
+    @Test
+    public void searchByIsbn_NotFound() throws Exception{
+        when(bookRepository.findByIsbn("1234")).thenReturn(null);
+        mockMvc.perform(get("/books/searchByISBN/1234"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Detail\",\"details\":[\"Book not found by ISBN=1234\"]}"
+                )));
+        verify(eventService,never()).bookSearch(any(Book.class));
+    }
+
+    @Test
+    public void searchByAuther() throws Exception{
+        when(bookRepository.findByAuthorsIgnoreCaseIn(Arrays.asList("hello"))).thenReturn(Arrays.asList(new Book()));
+        mockMvc.perform(get("/books/searchByAuthor/hello"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "[{\"id\":0,\"title\":null,\"authors\":null,\"publicationDate\":null,\"ISBN\":null}]"
+                )));
+        verify(eventService,times(1)).bookSearch(any(Book.class));
+    }
+
+    @Test
+    public void searchByTitle() throws Exception{
+        when(bookRepository.findByTitleIgnoreCase("java")).thenReturn(Arrays.asList(new Book()));
+        mockMvc.perform(get("/books/searchByTitle/java"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "[{\"id\":0,\"title\":null,\"authors\":null,\"publicationDate\":null,\"ISBN\":null}]"
+                )));
+        verify(eventService,times(1)).bookSearch(any(Book.class));
+    }
+    @Test
+    public void searchByIsbn() throws Exception{
+        when(bookRepository.findByIsbn("1234")).thenReturn(Arrays.asList(new Book()));
+        mockMvc.perform(get("/books/searchByISBN/1234"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "[{\"id\":0,\"title\":null,\"authors\":null,\"publicationDate\":null,\"ISBN\":null}]"
+                )));
+        verify(eventService,times(1)).bookSearch(any(Book.class));
+    }
 
 
 }
