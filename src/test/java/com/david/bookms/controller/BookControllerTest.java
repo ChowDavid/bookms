@@ -21,10 +21,12 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -118,12 +120,71 @@ public class BookControllerTest {
     }
     @Test
     public void saveBook_ok() throws Exception{
+        when(bookRepository.save(any(Book.class))).thenReturn(new Book());
         mockMvc.perform(post("/books").contentType(MediaType.APPLICATION_JSON).content("{\"isbn\":\"1234567890123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(
                         ""
                 )));
-        //verify(eventService,times(1)).bookCreate(any(Book.class));
+        verify(eventService,times(1)).bookCreate(any(Book.class));
+        verify(bookRepository,times(1)).save(any(Book.class));
+    }
+
+    @Test
+    public void deleteBook_empty() throws Exception{
+        mockMvc.perform(delete("/books/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Detail\",\"details\":[\"Book not found by id=1\"]}"
+                )));
+        verify(eventService,never()).bookCreate(any(Book.class));
+        verify(bookRepository,never()).delete(any(Book.class));
+        verify(bookRepository,times(1)).findById(eq(1L));
+    }
+    @Test
+    public void deleteBook_OK() throws Exception{
+        when(bookRepository.findById(eq(1L))).thenReturn(Optional.of(new Book()));
+        mockMvc.perform(delete("/books/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"id\":0,\"title\":null,\"authors\":null,\"publicationDate\":null,\"ISBN\":null}"
+                )));
+        verify(eventService,times(1)).bookDelete(any(Book.class));
+        verify(bookRepository,times(1)).delete(any(Book.class));
+        verify(bookRepository,times(1)).findById(eq(1L));
+    }
+
+    @Test
+    public void updateBook_empty() throws Exception{
+        mockMvc.perform(put("/books/1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Exception\",\"details\":[\"Required request body is missing: public com.david.bookms.model.Book com.david.bookms.controller.BookController.updateBook(java.lang.Long,com.david.bookms.controller.dto.BookDto)\"]}"
+                )));
+        verify(bookRepository,never()).save(any(Book.class));
+        verify(eventService,never()).bookModify(any(Book.class),any(Book.class));
+    }
+    @Test
+    public void updateBook_notFound() throws Exception{
+        mockMvc.perform(put("/books/1").contentType(MediaType.APPLICATION_JSON).content("{\"isbn\":\"1234567890123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Detail\",\"details\":[\"Book not found by id=1\"]}"
+                )));
+        verify(bookRepository,never()).save(any(Book.class));
+        verify(eventService,never()).bookModify(any(Book.class),any(Book.class));
+    }
+
+    @Test
+    public void updateBook() throws Exception{
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(new Book()));
+        mockMvc.perform(put("/books/1").contentType(MediaType.APPLICATION_JSON).content("{\"isbn\":\"1234567890123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"id\":0,\"title\":null,\"authors\":null,\"publicationDate\":null,\"ISBN\":\"1234567890123\"}"
+                )));
+        verify(bookRepository,times(1)).save(any(Book.class));
+        verify(eventService,times(1)).bookModify(any(Book.class),any(Book.class));
     }
 
 

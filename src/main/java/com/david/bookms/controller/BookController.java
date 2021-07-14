@@ -98,8 +98,8 @@ public class BookController {
     public Book updateBook(@PathVariable("id") Long id,@RequestBody @Valid BookDto book){
         Book dbBook = bookRepository.findById(id).orElse(null);
         Book before = new Book();
-        BeanUtils.copyProperties(dbBook,before);
-        if (book!=null) {
+        if (dbBook!=null) {
+            BeanUtils.copyProperties(dbBook,before);
             BeanUtils.copyProperties(book,dbBook,"id");
             bookRepository.save(dbBook);
             eventService.bookModify(before,dbBook);
