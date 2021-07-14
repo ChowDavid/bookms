@@ -50,6 +50,7 @@ public class BookController {
      */
     @PostMapping()
     public Book saveBook(@RequestBody @Valid BookDto book){
+        log.info("saveBook");
         Book dbBook = new Book();
         BeanUtils.copyProperties(book,dbBook);
         Book savedBook = bookRepository.save(dbBook);
@@ -64,6 +65,7 @@ public class BookController {
      */
     @GetMapping("/{id}")
     public Book getBookById(@PathVariable("id") Long id){
+        log.info("bookSearch by Id {}",id);
         Book book = bookRepository.findById(id).orElse(null);
         if (book!=null) {
             eventService.bookSearch(book);
@@ -80,6 +82,7 @@ public class BookController {
      */
     @DeleteMapping("/{id}")
     public Book deleteBook(@PathVariable("id") Long id){
+        log.info("book delete by id {}",id);
         Book book = bookRepository.findById(id).orElse(null);
         if (book!=null) {
             bookRepository.delete(book);
@@ -96,6 +99,7 @@ public class BookController {
      */
     @PutMapping("/{id}")
     public Book updateBook(@PathVariable("id") Long id,@RequestBody @Valid BookDto book){
+        log.info("book update by id {}",id);
         Book dbBook = bookRepository.findById(id).orElse(null);
         Book before = new Book();
         if (dbBook!=null) {
@@ -111,6 +115,7 @@ public class BookController {
 
     @GetMapping("/searchByAuthor/{author}")
     public List<Book> searchByAuthor(@PathVariable("author") String author){
+        log.info("search by author {}",author);
         List<Book> dbBooks = bookRepository.findByAuthorsIgnoreCaseIn(Arrays.asList(author));
         if (dbBooks!=null) {
             dbBooks.stream().forEach(b->eventService.bookSearch(b));
@@ -122,6 +127,7 @@ public class BookController {
 
     @GetMapping("/searchByTitle/{title}")
     public List<Book> searchByTitle(@PathVariable("title") String title){
+        log.info("search by title {}",title);
         List<Book> dbBooks = bookRepository.findByTitleIgnoreCase(title);
         if (dbBooks!=null) {
             dbBooks.stream().forEach(b->eventService.bookSearch(b));
@@ -132,6 +138,7 @@ public class BookController {
     }
     @GetMapping("/searchByISBN/{isbn}")
     public List<Book> searchByIsbn(@PathVariable("isbn") String isbn){
+        log.info("search by Isbn {}",isbn);
         List<Book> dbBooks = bookRepository.findByIsbn(isbn);
         if (dbBooks!=null) {
             dbBooks.stream().forEach(b->eventService.bookSearch(b));
@@ -144,7 +151,7 @@ public class BookController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public final ResponseEntity<ErrorResponse> validationErrorException(MethodArgumentNotValidException ex, WebRequest request){
-        log.error("validationErrorException found {}",ex.getMessage());
+        log.warn("validationErrorException found {}",ex.getMessage());
         List<String> details = new ArrayList<>();
         details.addAll(ex.getBindingResult().getAllErrors().stream().map(e->(FieldError)e).map(e->"Field "+e.getField()+"-"+e.getDefaultMessage()).collect(Collectors.toList()));
         ErrorResponse error = new ErrorResponse("Validation Error", details);
@@ -153,7 +160,7 @@ public class BookController {
 
     @ExceptionHandler(NoBookFoundExcpetion.class)
     public final ResponseEntity<ErrorResponse> noBookFound(NoBookFoundExcpetion ex, WebRequest request) {
-        log.error("noBookFound found {}",ex.getMessage());
+        log.warn("noBookFound found {}",ex.getMessage());
         List<String> details = new ArrayList<>();
         details.add(ex.getMessage());
         ErrorResponse error = new ErrorResponse("Detail", details);
