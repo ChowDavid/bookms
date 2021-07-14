@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -145,6 +146,22 @@ public class BookController {
             return dbBooks;
         } else {
             throw new NoBookFoundExcpetion("Book not found by ISBN="+ isbn);
+        }
+    }
+
+    @GetMapping("/search")
+    public List<Book> search(
+            @RequestParam(name="title",required = false) String title,
+            @RequestParam(name="author",required = false) String author,
+            @RequestParam(name="isbn",required = false) String isbn
+            ){
+        log.info("Search {} {} {}",title,author,isbn);
+        List<Book> dbBooks = bookRepository.search(author,title,isbn);
+        if (dbBooks==null || dbBooks.isEmpty()){
+            throw new NoBookFoundExcpetion(String.format("Book not found %s %s %s",title,author,isbn));
+        } else {
+            dbBooks.stream().forEach(b->eventService.bookSearch(b));
+            return dbBooks;
         }
     }
 

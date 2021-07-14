@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 @DataJpaTest
 class BookRepositoryTest {
@@ -33,30 +35,39 @@ class BookRepositoryTest {
     public void delete(){
         Book book = new Book();
         Book dbBook = bookRepository.save(book);
-        Assertions.assertEquals(1,dbBook.getId());
+        assertEquals(1,dbBook.getId());
         bookRepository.delete(dbBook);
-        Assertions.assertEquals(Optional.empty(),bookRepository.findById(1L));
+        assertEquals(Optional.empty(),bookRepository.findById(1L));
     }
     @Test
     public void findByTitle(){
         bookRepository.saveAll(getAllBooks());
         List<Book> books= bookRepository.findByTitleIgnoreCase("Java");
-        Assertions.assertEquals(1,books.size());
-        Assertions.assertEquals("Java",books.get(0).getTitle());
+        assertEquals(1,books.size());
+        assertEquals("Java",books.get(0).getTitle());
     }
     @Test
     public void findByAuthor(){
         bookRepository.saveAll(getAllBooks());
         List<Book> books= bookRepository.findByAuthorsIgnoreCaseIn(Arrays.asList("David"));
-        Assertions.assertEquals(1,books.size());
-        Assertions.assertEquals("David",books.get(0).getAuthors().get(0));
+        assertEquals(1,books.size());
+        assertEquals("David",books.get(0).getAuthors().get(0));
     }
     @Test
     public void findByISBN(){
         bookRepository.saveAll(getAllBooks());
         List<Book> books= bookRepository.findByIsbn("1234567890123");
-        Assertions.assertEquals(3,books.size());
-        Assertions.assertEquals("1234567890123",books.get(0).getIsbn());
+        assertEquals(3,books.size());
+        assertEquals("1234567890123",books.get(0).getIsbn());
+    }
+
+    @Test
+    public void search(){
+        bookRepository.saveAll(getAllBooks());
+        assertEquals(1,bookRepository.search("David",null,null).size());
+        assertEquals(1,bookRepository.search(null,"Java",null).size());
+        assertEquals(3,bookRepository.search(null,null,"1234567890123").size());
+
     }
 
 

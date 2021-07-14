@@ -251,5 +251,27 @@ public class BookControllerTest {
         verify(eventService,times(1)).bookSearch(any(Book.class));
     }
 
+    @Test
+    public void seach_empry() throws Exception {
+        mockMvc.perform(get("/books/search"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "{\"message\":\"Detail\",\"details\":[\"Book not found null null null\"]}"
+                )));
+        verify(bookRepository,times(1)).search(any(),any(),any());
+        verify(eventService,never()).bookSearch(any(Book.class));
+    }
+    @Test
+    public void seach() throws Exception {
+        when(bookRepository.search(any(),any(),any())).thenReturn(Arrays.asList(new Book()));
+        mockMvc.perform(get("/books/search?title=123&author=david&ISBN=123456789"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "[{\"id\":0,\"title\":null,\"authors\":null,\"publicationDate\":null,\"ISBN\":null}]"
+                )));
+        verify(bookRepository,times(1)).search(any(),any(),any());
+        verify(eventService,times(1)).bookSearch(any(Book.class));
+    }
+
 
 }
