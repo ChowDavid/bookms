@@ -3,6 +3,7 @@ package com.david.bookms.service;
 import com.david.bookms.model.Book;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -26,10 +27,12 @@ public class EventServiceImpl implements EventService {
     @Value("${skfka.record.key}")
     private String key;
 
-    private KafkaProducer<String ,String> producer;
+    private Producer<String ,String> producer;
     private ProducerRecord<String, String> record;
 
-    private String log(String formated,Book... books){
+
+
+    private String log(String formated, Book... books){
         String  message = String.format(formated,books);
         return LocalDateTime.now()+" "+message;
     }
